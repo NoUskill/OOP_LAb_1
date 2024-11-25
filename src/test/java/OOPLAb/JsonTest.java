@@ -13,63 +13,7 @@ import java.util.Objects;
 import java.util.Scanner;
 import com.google.gson.annotations.SerializedName;
 
-class wik_page{
-    @SerializedName("ns")
-    int ns;
-    @SerializedName("title")
-    String title;
-    @SerializedName("pageid")
-    int pageid;
-    @SerializedName("size")
-    int size;
-    @SerializedName("wordcount")
-    int wordcount;
-    @SerializedName("snippet")
-    String snippet;
-    @SerializedName("timestamp")
-    String timestamp;
 
-    void print(){
-        System.out.println(this.title+" ("+this.pageid+")");
-    }
-}
-class Continue {
-    @SerializedName("sroffset")
-    public float sroffset;
-    @SerializedName("continue")
-    public String con;
-}
-class Query {
-    @SerializedName("searchinfo")
-    Searchinfo SearchinfoObject;
-    @SerializedName("search")
-    List<wik_page> search;
-    public void print(){
-        System.out.println("Всего статей найдено: "+this.search.size());
-        int i=1;
-        for(wik_page page : this.search){
-            System.out.print(i+": ");
-            page.print();
-            i++;
-        }
-    }
-}
-class Searchinfo {
-    @SerializedName("totalhits")
-    private float totalhits;
-    @SerializedName("suggestion")
-    private String suggestion;
-    @SerializedName("suggestionsnippet")
-    private String suggestionsnippet;
-}
-class AnsvJson {
-    @SerializedName("batchcomplete")
-    public String batchcomplete;
-    @SerializedName("continue")
-    Continue ContinueObject;
-    @SerializedName("query")
-    Query QueryObject;
-}
 
 class NodeAnsvJson{
     AnsvJson body;
@@ -120,14 +64,18 @@ class NodeAnsvJson{
         this.print();
         int i=-1;
         String urlAddres = "";
-
         while (true){
             System.out.println("Выберите статью");
             Scanner in=new Scanner(System.in);
-            i = in.nextInt();
-            if(i<1||(i >this.body.ContinueObject.sroffset)){
+            String str;
+            str = in.nextLine();
+            if(!isNumeric(str)){
+                System.out.println("не верный номер");
+            }
+            else if((i=Integer.parseInt(str))<1||((i=Integer.parseInt(str))>this.body.ContinueObject.sroffset)){
                 System.out.println("не верный номер");
             }else{
+                i=Integer.parseInt(str);
                 Integer num=this.body.QueryObject.search.get(i - 1).pageid;
                 urlAddres = "https://ru.wikipedia.org/w/index.php?curid=" +num.toString();
                 break;
@@ -137,14 +85,29 @@ class NodeAnsvJson{
         }
         article_url=new URI(urlAddres);
         System.out.println("Ссылка на статью:\n"+article_url.toString());
+        while (true){
         System.out.println("Открыть ссылку(Y/N)?");
         Scanner in=new Scanner(System.in);
         String flag = in.nextLine();
         if(Objects.equals(flag, "Y")) {
             Desktop bros = Desktop.getDesktop();
             bros.browse(article_url);
+            break;
+        }else if(Objects.equals(flag, "N")) {
+            break;
         }
-
+        else {
+            System.out.println("Не верная команда");
+        }
+      }
+    }
+    private boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
 
